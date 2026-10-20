@@ -185,8 +185,13 @@
   .card .cab { display: flex; gap: 26px; align-items: center; }
   .card .foto {
     width: 128px; height: 128px; flex: none; border-radius: 6px;
-    background: #F5F5F5; display: grid; place-items: center; font-size: 68px;
+    background: #F5F5F5; display: grid; place-items: center;
   }
+  .card .foto svg {
+    width: 76px; height: 76px; fill: none;
+    stroke: var(--azul-marinho); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .card .foto .p { fill: var(--amarelo); }
   .card h3 { margin: 0; font-size: 36px; font-weight: 900; line-height: 1.05; }
   .card .pergunta { margin: 8px 0 12px; font-size: 21px; color: var(--cinza); font-style: italic; }
   .nota { display: flex; align-items: center; gap: 12px; font-size: 20px; color: var(--cinza); font-weight: 600; }
@@ -354,14 +359,14 @@
       <p class="trilha"><a>Avaliação</a> &rsaquo; <a>Mercado Livre</a> &rsaquo; Funcionalidade e desempenho</p>
       <h2>Faz o que precisa, e rápido? <span class="resultados">2 resultados</span></h2>
       <div class="cards">
-        <article class="card" data-nome="Adequação funcional" data-nota="5" data-icone="🛒" data-pergunta="O sistema faz o que o usuário precisa?">
+        <article class="card" data-nome="Adequação funcional" data-nota="5" data-icone="carrinho" data-pergunta="O sistema faz o que o usuário precisa?">
           <ul class="evid">
             <li class="ok">Busca com filtros, carrinho, pagamento, rastreio e devolução no mesmo app</li>
             <li class="ok">Perguntas ao vendedor e avaliações com fotos ajudam a decidir</li>
             <li class="ok">Compra Garantida devolve o dinheiro se o produto não chegar</li>
           </ul>
         </article>
-        <article class="card" data-nome="Eficiência de desempenho" data-nota="4" data-icone="⚡" data-pergunta="O sistema responde rapidamente?">
+        <article class="card" data-nome="Eficiência de desempenho" data-nota="4" data-icone="raio" data-pergunta="O sistema responde rapidamente?">
           <ul class="evid">
             <li class="ok">Busca e páginas de produto abrem rápido no Wi-Fi e no 4G</li>
             <li class="ok">Imagens carregam aos poucos sem travar a rolagem</li>
@@ -379,14 +384,14 @@
       <p class="trilha"><a>Avaliação</a> &rsaquo; <a>Mercado Livre</a> &rsaquo; Compatibilidade e usabilidade</p>
       <h2>Conversa com tudo e é fácil de usar? <span class="resultados">2 resultados</span></h2>
       <div class="cards">
-        <article class="card" data-nome="Compatibilidade" data-nota="5" data-icone="🔌" data-pergunta="Funciona bem com outros sistemas ou ambientes?">
+        <article class="card" data-nome="Compatibilidade" data-nota="5" data-icone="tomada" data-pergunta="Funciona bem com outros sistemas ou ambientes?">
           <ul class="evid">
             <li class="ok">Integrado ao Mercado Pago: Pix, cartão, boleto e saldo em conta</li>
             <li class="ok">Anúncios compartilhados pelo WhatsApp e redes sociais</li>
             <li class="ok">Link aberto no navegador vai direto para o app</li>
           </ul>
         </article>
-        <article class="card" data-nome="Usabilidade" data-nota="4" data-icone="👆" data-pergunta="É fácil de aprender e usar?">
+        <article class="card" data-nome="Usabilidade" data-nota="4" data-icone="cursor" data-pergunta="É fácil de aprender e usar?">
           <ul class="evid">
             <li class="ok">Do produto ao pagamento em poucos toques</li>
             <li class="ok">Visual consistente: amarelo, azul e o verde do frete grátis</li>
@@ -404,14 +409,14 @@
       <p class="trilha"><a>Avaliação</a> &rsaquo; <a>Mercado Livre</a> &rsaquo; Confiabilidade e segurança</p>
       <h2>Dá pra confiar? <span class="resultados">2 resultados</span></h2>
       <div class="cards">
-        <article class="card" data-nome="Confiabilidade" data-nota="4" data-icone="🕒" data-pergunta="O sistema se mantém estável e disponível?">
+        <article class="card" data-nome="Confiabilidade" data-nota="4" data-icone="relogio" data-pergunta="O sistema se mantém estável e disponível?">
           <ul class="evid">
             <li class="ok">Raramente fica fora do ar no dia a dia</li>
             <li class="ok">Carrinho e histórico sincronizam entre celular e computador</li>
             <li class="ruim">Picos como a Black Friday já causaram lentidão e erros</li>
           </ul>
         </article>
-        <article class="card" data-nome="Segurança" data-nota="4" data-icone="🔒" data-pergunta="Protege dados e acessos?">
+        <article class="card" data-nome="Segurança" data-nota="4" data-icone="cadeado" data-pergunta="Protege dados e acessos?">
           <ul class="evid">
             <li class="ok">Verificação em duas etapas e login por biometria</li>
             <li class="ok">Pagamento intermediado: o vendedor não vê os dados do cartão</li>
@@ -429,14 +434,14 @@
       <p class="trilha"><a>Avaliação</a> &rsaquo; <a>Mercado Livre</a> &rsaquo; Manutenibilidade e portabilidade</p>
       <h2>Evolui fácil e roda em qualquer lugar? <span class="resultados">2 resultados</span></h2>
       <div class="cards">
-        <article class="card" data-nome="Manutenibilidade" data-nota="4" data-icone="🔧" data-pergunta="Parece fácil de corrigir, adaptar ou evoluir?">
+        <article class="card" data-nome="Manutenibilidade" data-nota="4" data-icone="chave" data-pergunta="Parece fácil de corrigir, adaptar ou evoluir?">
           <ul class="evid">
             <li class="ok">Atualizações frequentes na loja de apps</li>
             <li class="ok">Funções novas chegam sem quebrar as antigas</li>
             <li class="ruim">Como usuários, só vemos o resultado, não o código</li>
           </ul>
         </article>
-        <article class="card" data-nome="Portabilidade" data-nota="5" data-icone="📱" data-pergunta="Funciona em diferentes dispositivos ou plataformas?">
+        <article class="card" data-nome="Portabilidade" data-nota="5" data-icone="celular" data-pergunta="Funciona em diferentes dispositivos ou plataformas?">
           <ul class="evid">
             <li class="ok">Android, iOS e web com a mesma conta</li>
             <li class="ok">Se adapta a celular, tablet e computador</li>
@@ -509,6 +514,19 @@ document.querySelectorAll('[data-topo]').forEach(h => {
     <div class="disc"><b>ISO/IEC 25000</b>Lab. Qualidade de Produto de Software</div>`;
 });
 
+// ícones dos cartões (data-icone): contorno azul-marinho, preenchimento amarelo
+const ICONES = {
+  carrinho: `<path class="p" d="M13 14h29l-5 16H17z"/><path d="M4 8h6l7 22h20"/><circle cx="19" cy="39" r="3"/><circle cx="35" cy="39" r="3"/>`,
+  raio:     `<path class="p" d="M28 4L10 27h12l-3 17 19-24H26z"/>`,
+  tomada:   `<path d="M18 4v10M30 4v10M24 35v9"/><path class="p" d="M11 14h26v8a13 13 0 0 1-26 0z"/>`,
+  cursor:   `<path class="p" d="M16 8l22 14-10 3 6 12-5 2-6-12-7 7z"/><path d="M9 9L5 5M8 17H3M16 4V1"/>`,
+  relogio:  `<circle class="p" cx="24" cy="24" r="19"/><path d="M24 12v12l8 5"/>`,
+  cadeado:  `<path d="M16 21v-6a8 8 0 0 1 16 0v6"/><rect class="p" x="9" y="21" width="30" height="22" rx="4"/><path d="M24 29v6"/>`,
+  // chave inglesa: ícone "wrench" do Lucide (lucide.dev, licença ISC), desenhado em 24px e ampliado
+  chave:    `<g transform="scale(2)"><path class="p" stroke-width="1.5" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></g>`,
+  celular:  `<rect class="p" x="12" y="3" width="24" height="42" rx="5"/><rect x="16" y="9" width="16" height="26" rx="1" fill="#fff"/><path d="M21 40h6"/>`,
+};
+
 // cartões: as notas ficam só no atributo data-nota, todo o resto é calculado a partir dele
 const cards = [...document.querySelectorAll('.card[data-nota]')];
 const itens = cards.map(c => ({ nome: c.dataset.nome, nota: +c.dataset.nota, pergunta: c.dataset.pergunta }));
@@ -517,7 +535,7 @@ cards.forEach(c => {
   const selo = nota === 5 ? '<div class="selo">Nota máxima</div>' : nota <= 2 ? '<div class="selo atencao">Precisa melhorar</div>' : '<div class="selo"></div>';
   c.insertAdjacentHTML('afterbegin', `
     <div class="cab">
-      <div class="foto">${c.dataset.icone}</div>
+      <div class="foto"><svg viewBox="0 0 48 48" aria-hidden="true">${ICONES[c.dataset.icone]}</svg></div>
       <div>
         <h3>${c.dataset.nome}</h3>
         <p class="pergunta">${c.dataset.pergunta}</p>
