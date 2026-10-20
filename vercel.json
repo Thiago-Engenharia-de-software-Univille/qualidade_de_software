@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/apresentacao-mercado-livre/index.html" },
+    { "source": "/:path*", "destination": "/apresentacao-mercado-livre/:path*" }
+  ]
+}
