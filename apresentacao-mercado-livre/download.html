@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Baixar slides: Mercado Livre e a ISO/IEC 25000</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --amarelo: #FFE600;
+    --azul-marinho: #2D3277;
+    --azul: #3483FA;
+    --verde: #00A650;
+    --fundo: #EBEBEB;
+    --texto: #333333;
+    --cinza: #737373;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh;
+    background: var(--fundo);
+    font-family: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+    color: var(--texto);
+  }
+  header { background: var(--amarelo); padding: 14px 24px; box-shadow: 0 1px 0 rgba(0,0,0,.1); }
+  header img { height: 64px; display: block; margin: 0 auto; }
+  main { max-width: 960px; margin: 32px auto; padding: 0 16px; }
+  .trilha { font-size: 15px; color: var(--cinza); margin: 0 0 12px; }
+  .anuncio {
+    background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,.12);
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; padding: 28px;
+  }
+  .anuncio img { width: 100%; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.18); display: block; }
+  .estado { font-size: 15px; color: var(--cinza); margin: 0 0 6px; }
+  h1 { font-size: 30px; line-height: 1.15; margin: 0 0 14px; font-weight: 900; }
+  .preco { font-size: 40px; font-weight: 400; margin: 0; }
+  .gratis { color: var(--verde); font-weight: 800; font-size: 17px; margin: 4px 0 20px; }
+  ul { margin: 0 0 24px; padding-left: 20px; font-size: 16px; line-height: 1.6; }
+  .botao {
+    display: block; text-align: center; text-decoration: none;
+    font-weight: 800; font-size: 17px; padding: 14px; border-radius: 6px; margin-bottom: 10px;
+  }
+  .botao.principal { background: var(--azul); color: #fff; }
+  .botao.principal:hover { background: #2968C8; }
+  .botao.secundario { background: rgba(65,137,230,.12); color: var(--azul); }
+  .botao.secundario:hover { background: rgba(65,137,230,.2); }
+  .botao:focus-visible { outline: 3px solid var(--azul-marinho); outline-offset: 2px; }
+  .equipe { font-size: 14px; color: var(--cinza); margin: 20px 0 0; line-height: 1.5; }
+  @media (max-width: 720px) {
+    .anuncio { grid-template-columns: 1fr; padding: 18px; }
+  }
+</style>
+</head>
+<body>
+  <header><img src="mercado-livre.svg" alt="Mercado Livre"></header>
+  <main>
+    <p class="trilha">Lab. Qualidade de Produto de Software &rsaquo; Avaliação com a ISO/IEC 25000</p>
+    <article class="anuncio">
+      <img src="capa.png" alt="Capa da apresentação: Mercado Livre sob a lupa da ISO/IEC 25000">
+      <div>
+        <p class="estado">PDF | 8 slides | 1,2 MB</p>
+        <h1>Mercado Livre sob a lupa da ISO/IEC 25000</h1>
+        <p class="preco">R$ 0</p>
+        <p class="gratis">Download grátis</p>
+        <ul>
+          <li>8 características de qualidade avaliadas</li>
+          <li>Notas de 1 a 5 com evidências</li>
+          <li>Média final: 4,4 de 5</li>
+        </ul>
+        <a class="botao principal" href="mercado-livre-iso25000.pdf" download>Baixar PDF</a>
+        <a class="botao secundario" href="index.html">Abrir apresentação</a>
+        <p class="equipe">Equipe: Arthur Voit, Henrrique Miguel, Nicolas do Santos, Pedro Luca, Thiago Wendt e Vinicius Pupo</p>
+        <p class="equipe">Trabalho acadêmico da Univille, sem vínculo com o Mercado Livre. A marca pertence aos seus donos.</p>
+      </div>
+    </article>
+  </main>
+</body>
+</html>

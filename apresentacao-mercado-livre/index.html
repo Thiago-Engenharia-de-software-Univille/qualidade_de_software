@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Mercado Livre e a ISO/IEC 25000</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --amarelo: #FFE600;
+    --azul-marinho: #2D3277;
+    --azul: #3483FA;
+    --verde: #00A650;
+    --laranja: #FF7733;
+    --fundo: #EBEBEB;
+    --texto: #333333;
+    --cinza: #737373;
+    --papelao: #C8955A;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body {
+    background: var(--azul-marinho);
+    font-family: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+    color: var(--texto);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* palco 16:9 que escala para qualquer tela/projetor */
+  #stage {
+    position: absolute; left: 50%; top: 50%;
+    width: 1600px; height: 900px;
+    transform-origin: center;
+    overflow: hidden;
+    background: var(--fundo);
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    opacity: 0; visibility: hidden;
+    transition: opacity .45s ease, visibility .45s;
+    background: var(--fundo);
+  }
+  .slide.active { opacity: 1; visibility: visible; }
+  .slide.amarelo { background: var(--amarelo); }
+
+  /* ---------- logo ---------- */
+  .logo svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .logo .oval, .logo .maos, .logo .letra { transform-box: fill-box; transform-origin: center; }
+
+  /* ---------- capa ---------- */
+  .capa .logo { position: absolute; right: 90px; top: 56px; width: 330px; }
+  .capa h1 {
+    position: absolute; left: 80px; top: 210px; margin: 0;
+    max-width: 1000px;
+    font-size: 84px; line-height: 1; font-weight: 900; letter-spacing: -2px;
+    color: var(--azul-marinho);
+  }
+  .capa .sub {
+    position: absolute; left: 84px; top: 400px; margin: 0;
+    font-size: 28px; font-weight: 600; color: var(--azul-marinho); max-width: 820px;
+  }
+  .capa .meta {
+    position: absolute; left: 84px; top: 80px;
+    font-size: 20px; line-height: 1.5; color: var(--azul-marinho); font-weight: 700;
+  }
+  .capa .meta span { display: block; font-weight: 600; opacity: .8; }
+
+  /* logo da capa: o oval surge, as mãos se apertam e as letras pulam uma a uma */
+  .slide.active .logo-capa .oval { animation: pop .7s cubic-bezier(.3,1.6,.5,1) .1s both; }
+  .slide.active .logo-capa .maos { animation: pop .6s cubic-bezier(.3,1.6,.5,1) .4s both, aperto .45s ease-in-out 1.1s 3; }
+  .slide.active .logo-capa .letra { animation: letra .45s cubic-bezier(.3,1.6,.5,1) both; animation-delay: calc(.6s + var(--i) * .07s); }
+  @keyframes letra { from { transform: translateY(60px) scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
+  .slide.active .surge { animation: sobe .7s ease-out both; animation-delay: var(--d, .3s); }
+
+  @keyframes pop { from { transform: scale(0) rotate(-12deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes aperto { 0%,100% { transform: rotate(0); } 25% { transform: translateY(-4px) rotate(-5deg); } 75% { transform: translateY(4px) rotate(5deg); } }
+  @keyframes sobe { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  /* ---------- cena do caminhão ---------- */
+  .scene { position: absolute; left: 0; right: 0; bottom: 56px; height: 340px; }
+  .road {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 40px;
+    background: var(--azul-marinho);
+  }
+  .road::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 18px; height: 4px;
+    background: repeating-linear-gradient(90deg, #fff 0 40px, transparent 40px 80px);
+    opacity: .7;
+  }
+  .slide.active .road::after { animation: estrada .3s linear 6; }
+  @keyframes estrada { to { background-position: -80px 0; } }
+
+  .truck { position: absolute; left: 980px; bottom: 22px; width: 520px; }
+  .truck svg { width: 100%; display: block; overflow: visible; }
+  .slide.active .truck { animation: chega 1.8s cubic-bezier(.2,.7,.25,1) both; }
+  .slide.active .truck .wheel { animation: gira .35s linear 5; }
+  .slide.active .truck .porta { animation: abre .5s ease-out 1.9s both; }
+  .wheel { transform-box: fill-box; transform-origin: center; }
+  .porta { transform-box: fill-box; transform-origin: left center; }
+  @keyframes chega { from { transform: translateX(-1200px); } 85% { transform: translateX(10px); } to { transform: none; } }
+  @keyframes gira { to { transform: rotate(360deg); } }
+  @keyframes abre { to { transform: scaleX(-1.2); } }
+
+  .worker {
+    position: absolute; left: 940px; bottom: 40px; width: 50px; opacity: 0;
+  }
+  .worker svg { width: 50px; height: 130px; display: block; overflow: visible; }
+  .slide.active .worker {
+    animation: aparece .2s linear var(--d) both, carrega 3s linear var(--d) infinite;
+  }
+  .slide.active .worker .cargo,
+  .slide.active .worker .bracos-cima { animation: comCaixa 3s steps(1) var(--d) infinite; }
+  .slide.active .worker .bracos-baixo { animation: semCaixa 3s steps(1) var(--d) infinite; }
+  .slide.active .worker .perna { animation: passo .3s ease-in-out var(--d) infinite alternate; }
+  .worker .bracos-baixo { opacity: 0; }
+  .perna { transform-box: fill-box; transform-origin: top center; }
+  .worker .perna.b { animation-direction: alternate-reverse !important; }
+  @keyframes aparece { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes carrega {
+    0%   { transform: translateX(0) scaleX(1); }
+    45%  { transform: translateX(-300px) scaleX(1); }
+    50%  { transform: translateX(-300px) scaleX(-1); }
+    95%  { transform: translateX(0) scaleX(-1); }
+    100% { transform: translateX(0) scaleX(1); }
+  }
+  @keyframes comCaixa { 0% { opacity: 1; } 46% { opacity: 0; } 96% { opacity: 1; } }
+  @keyframes semCaixa { 0% { opacity: 0; } 46% { opacity: 1; } 96% { opacity: 0; } }
+  @keyframes passo { from { transform: rotate(-22deg); } to { transform: rotate(22deg); } }
+
+  .pile {
+    position: absolute; left: 560px; bottom: 40px; width: 216px;
+    display: flex; flex-wrap: wrap-reverse; justify-content: center; gap: 4px;
+  }
+  .box {
+    width: 66px; height: 58px; border-radius: 4px;
+    background: var(--papelao); border: 3px solid #8A5A2B;
+    position: relative; opacity: 0;
+  }
+  .box::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 12px; margin-left: -6px; background: #E8C18A; }
+  .box::after {
+    content: "ML"; position: absolute; right: 4px; bottom: 2px;
+    font-size: 11px; font-weight: 900; color: var(--azul-marinho);
+  }
+  .slide.active .pile .box { animation: cai .4s cubic-bezier(.3,1.5,.6,1) var(--d) both; }
+  @keyframes cai { from { opacity: 0; transform: translateY(-70px); } to { opacity: 1; transform: none; } }
+
+  /* ---------- cabeçalho estilo app ---------- */
+  .topo {
+    position: absolute; left: 0; right: 0; top: 0; height: 104px;
+    background: var(--amarelo);
+    display: flex; align-items: center; gap: 36px; padding: 0 56px;
+    box-shadow: 0 1px 0 rgba(0,0,0,.1);
+  }
+  .topo .logo { width: 100px; flex: none; }
+  .busca {
+    flex: 1; max-width: 860px; height: 54px;
+    background: #fff; border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; font-size: 22px; color: var(--texto); font-weight: 600;
+  }
+  .busca svg { width: 26px; height: 26px; color: var(--cinza); }
+  .topo .disc { margin-left: auto; text-align: right; font-size: 17px; line-height: 1.3; color: var(--azul-marinho); font-weight: 600; }
+  .topo .disc b { display: block; font-size: 20px; font-weight: 900; }
+
+  .corpo { position: absolute; left: 60px; right: 60px; top: 128px; bottom: 76px; }
+  .trilha { font-size: 17px; color: var(--cinza); margin: 0 0 6px; }
+  .trilha a { color: var(--azul); text-decoration: none; }
+  .corpo h2 { margin: 0 0 26px; font-size: 50px; font-weight: 900; letter-spacing: -1px; color: var(--texto); }
+  .resultados { font-size: 18px; color: var(--cinza); font-weight: 600; margin-left: 14px; letter-spacing: 0; }
+
+  /* ---------- cartões de característica (como anúncios) ---------- */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+  .card {
+    background: #fff; border-radius: 8px; padding: 30px 34px 26px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.12);
+    min-height: 560px;
+  }
+  .slide.active .card { animation: sobe .6s cubic-bezier(.2,.8,.3,1) both; }
+  .slide.active .card:nth-child(2) { animation-delay: .25s; }
+  .card .cab { display: flex; gap: 26px; align-items: center; }
+  .card .foto {
+    width: 128px; height: 128px; flex: none; border-radius: 6px;
+    background: #F5F5F5; display: grid; place-items: center; font-size: 68px;
+  }
+  .card h3 { margin: 0; font-size: 36px; font-weight: 900; line-height: 1.05; }
+  .card .pergunta { margin: 8px 0 12px; font-size: 21px; color: var(--cinza); font-style: italic; }
+  .nota { display: flex; align-items: center; gap: 12px; font-size: 20px; color: var(--cinza); font-weight: 600; }
+  .nota .num { font-size: 34px; font-weight: 900; color: var(--texto); }
+  .estrelas { display: inline-flex; gap: 3px; }
+  .estrelas svg { width: 30px; height: 30px; }
+  .estrelas .vazia { fill: #DDDDDD; }
+  .estrelas .cheia { fill: var(--azul); }
+  .slide.active .estrelas .cheia { animation: estrela .35s cubic-bezier(.3,1.8,.5,1) both; animation-delay: calc(.6s + var(--i) * .12s); }
+  @keyframes estrela { from { transform: scale(0); } to { transform: scale(1); } }
+  .estrelas svg { transform-box: fill-box; transform-origin: center; }
+  .selo { margin-top: 10px; font-size: 19px; font-weight: 800; color: var(--verde); min-height: 26px; }
+  .selo.atencao { color: var(--laranja); }
+
+  .evid { list-style: none; margin: 22px 0 0; padding: 22px 0 0; border-top: 1px solid #E6E6E6; }
+  .evid li { position: relative; padding-left: 40px; font-size: 23px; line-height: 1.35; margin-bottom: 14px; }
+  .evid li::before {
+    position: absolute; left: 0; top: 2px; width: 26px; height: 26px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 16px; font-weight: 900; color: #fff;
+  }
+  .evid li.ok::before { content: "✓"; background: var(--verde); }
+  .evid li.ruim::before { content: "!"; background: var(--laranja); }
+
+  /* ---------- slide do pedido ---------- */
+  .pedido { display: grid; grid-template-columns: 1fr 640px; gap: 40px; }
+  .pedido .texto p { font-size: 27px; line-height: 1.45; margin: 0 0 22px; max-width: 30em; }
+  .chips { display: flex; flex-wrap: wrap; gap: 12px; margin: 8px 0 30px; }
+  .chip { background: #fff; border-radius: 30px; padding: 10px 22px; font-size: 21px; font-weight: 800; color: var(--azul-marinho); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+  .escala { background: #fff; border-radius: 8px; padding: 22px 28px; box-shadow: 0 1px 2px rgba(0,0,0,.12); font-size: 22px; }
+  .escala .linha { display: flex; align-items: center; gap: 16px; margin-top: 10px; color: var(--cinza); font-weight: 600; }
+  .carrinho { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,.12); padding: 24px 30px; }
+  .carrinho h4 { margin: 0 0 8px; font-size: 26px; font-weight: 900; }
+  .carrinho ol { list-style: none; margin: 0; padding: 0; }
+  .carrinho li { display: flex; gap: 16px; align-items: center; padding: 6px 0; border-top: 1px solid #EEE; }
+  .carrinho li:first-child { border-top: 0; }
+  .carrinho .check { width: 26px; height: 26px; flex: none; border-radius: 5px; background: var(--azul); color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 16px; }
+  .carrinho .nome { font-weight: 800; font-size: 20px; line-height: 1.2; }
+  .carrinho .q { font-size: 16px; color: var(--cinza); line-height: 1.3; }
+  .slide.active .carrinho li { animation: entraCarrinho .4s ease-out both; animation-delay: calc(.3s + var(--i) * .14s); }
+  @keyframes entraCarrinho { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+
+  /* ---------- placar ---------- */
+  .placar { display: grid; grid-template-columns: 420px 1fr; gap: 36px; }
+  .resumo { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,.12); padding: 34px; }
+  .resumo .media { font-size: 140px; font-weight: 900; line-height: 1; color: var(--texto); letter-spacing: -4px; }
+  .resumo .estrelas svg { width: 40px; height: 40px; }
+  .resumo .legenda { font-size: 21px; color: var(--cinza); margin: 12px 0 26px; font-weight: 600; }
+  .resumo h4 { font-size: 22px; margin: 18px 0 8px; font-weight: 900; }
+  .resumo ul { margin: 0; padding-left: 22px; font-size: 20px; line-height: 1.45; }
+  .resumo h4.bom { color: var(--verde); }
+  .resumo h4.melhorar { color: var(--laranja); }
+  .barras { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,.12); padding: 30px 38px; }
+  .barras h4 { margin: 0 0 14px; font-size: 26px; font-weight: 900; }
+  .barra { display: grid; grid-template-columns: 300px 1fr 60px; align-items: center; gap: 20px; padding: 12px 0; font-size: 22px; font-weight: 700; }
+  .barra .trilho { height: 14px; border-radius: 7px; background: #EEE; overflow: hidden; }
+  .barra .enche { height: 100%; width: var(--w); background: var(--azul); border-radius: 7px; transform-origin: left; }
+  .barra .enche.max { background: var(--verde); }
+  .barra .v { text-align: right; font-weight: 900; }
+  .slide.active .barra .enche { animation: enche 1s cubic-bezier(.2,.8,.3,1) both; animation-delay: calc(.3s + var(--i) * .1s); }
+  @keyframes enche { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+  /* ---------- final ---------- */
+  .final h1 {
+    position: absolute; left: 80px; top: 90px; margin: 0;
+    font-size: 120px; font-weight: 900; letter-spacing: -3px; color: var(--azul-marinho); line-height: 1;
+  }
+  .final .sub { position: absolute; left: 86px; top: 236px; margin: 0; font-size: 34px; font-weight: 700; color: var(--azul-marinho); }
+  .carimbo {
+    position: absolute; right: 120px; top: 80px;
+    width: 230px; height: 230px; border-radius: 50%;
+    border: 8px solid var(--verde); color: var(--verde);
+    display: grid; place-items: center; text-align: center;
+    font-weight: 900; font-size: 30px; line-height: 1.1; transform: rotate(-12deg);
+    background: rgba(255,255,255,.55);
+  }
+  .carimbo b { display: block; font-size: 64px; }
+  .slide.active .carimbo { animation: carimba .5s cubic-bezier(.3,1.6,.5,1) 7.6s both; }
+  @keyframes carimba { from { transform: scale(2.4) rotate(-12deg); opacity: 0; } to { transform: scale(1) rotate(-12deg); opacity: 1; } }
+
+  /* ---------- rota de entrega (progresso) ---------- */
+  .rota { position: absolute; left: 60px; right: 60px; bottom: 16px; height: 34px; z-index: 5; display: flex; align-items: center; gap: 24px; }
+  .rota .linha { position: relative; flex: 1; height: 4px; background: repeating-linear-gradient(90deg, var(--azul-marinho) 0 10px, transparent 10px 18px); opacity: .9; }
+  .rota .parada { position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #fff; border: 3px solid var(--azul-marinho); cursor: pointer; }
+  .rota .parada.feita { background: var(--verde); border-color: var(--verde); }
+  .rota .mini { position: absolute; top: -26px; width: 46px; margin-left: -23px; left: 0; transition: left .7s cubic-bezier(.4,.1,.2,1); }
+  .rota .contador { font-size: 18px; font-weight: 900; color: var(--azul-marinho); min-width: 52px; text-align: right; }
+
+  .dica { position: absolute; right: 60px; bottom: 56px; font-size: 15px; color: var(--azul-marinho); opacity: .6; z-index: 5; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important; animation-delay: 0s !important;
+      animation-iteration-count: 1 !important; transition-duration: .01ms !important;
+    }
+  }
+
+  /* modo PDF (index.html?print): um slide por página, já no estado final das animações */
+  @page { size: 1600px 900px; margin: 0; }
+  body.print { height: auto; overflow: visible; background: #fff; }
+  body.print #stage { position: static; transform: none; height: auto; }
+  body.print .slide { position: relative; height: 900px; overflow: hidden; break-after: page; }
+  body.print .rota { display: none; }
+  body.print *, body.print *::before, body.print *::after {
+    animation-duration: .01ms !important; animation-delay: 0s !important;
+    animation-iteration-count: 1 !important; transition: none !important;
+  }
+</style>
+</head>
+<body>
+
+<!-- símbolos reaproveitados: aperto de mãos e estrela -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="estrela" viewBox="0 0 24 24">
+    <path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>
+  </symbol>
+</svg>
+<template id="tpl-logo"><svg viewBox="0 0 947.65 794.69" role="img" aria-label="Mercado Livre"><g class="oval"><path d="M726.77,182.56C726.77,82,601.81,0,447.65,0S168.54,82,168.54,182.56c0,2.6,0,9.78,0,10.7,0,106.7,109.23,193.11,279.1,193.11,170.93,0,279.16-86.39,279.16-193.1Z" fill="#2d3277"/><path d="M716.09,182.47c0,94.82-120.16,171.68-268.4,171.68S179.32,277.29,179.32,182.47,299.48,10.78,447.69,10.78s268.4,76.87,268.4,171.69" fill="#f7d032"/></g><g class="maos"><path d="M358.58,128.3c-.13.28-2.81,3-1.09,5.27,4.25,5.41,17.33,8.52,30.56,5.55,7.87-1.77,18-9.8,27.75-17.56,10.6-8.42,21.12-16.85,31.68-20.21,11.2-3.57,18.36-2,23.1-.59,5.2,1.55,11.32,5,21.06,12.28,18.38,13.8,92.22,78.26,105,89.41,10.27-4.65,55.94-24.31,118-38-5.4-33.09-25.52-63.36-56-88.13C616,94.19,564.05,103.52,513.21,78.68c-.26-.1-27.77-13.13-54.92-12.49C418,67.13,400.5,84.59,382,103.06Z" fill="#fff"/><path d="M593.61,209.45c-.87-.77-86.82-76-106.3-90.62-11.26-8.46-17.54-10.61-24.12-11.44a32.61,32.61,0,0,0-11.46,1.09c-9.07,2.46-20.92,10.38-31.42,18.72-10.9,8.68-21.17,16.85-30.69,19-12.17,2.73-27-.49-33.81-5.07a15,15,0,0,1-5.62-6.15c-2.49-5.82,2.11-10.46,2.88-11.23l23.71-25.66c2.76-2.76,5.54-5.51,8.39-8.21a150.42,150.42,0,0,0-21.61,4.87c-8.6,2.41-16.87,4.71-25.23,4.71-3.5,0-22.2-3.07-25.75-4-21.47-5.88-40.31-11.59-68.44-24.73-33.73,25.09-56.29,56.48-62.8,91.06,4.84,1.29,12.66,3.61,15.93,4.33,76.31,17,100.09,34.46,104.4,38.11a25.23,25.23,0,0,1,39.6,2.32,28.76,28.76,0,0,1,18.19-6.4,33.89,33.89,0,0,1,10.9,1.91,25.13,25.13,0,0,1,15.37,13.88,25.14,25.14,0,0,1,10.61-2.25,32,32,0,0,1,12.69,2.8c14.08,6,16.26,19.85,15,30.27a25.34,25.34,0,0,1,3-.17,30.23,30.23,0,0,1,26.63,44.56c4.52,2.54,16.11,8.32,26.26,7,8.12-1,11.2-3.81,12.31-5.36.74-1.09,1.55-2.32.81-3.23L471.54,265.6s-3.55-3.34-2.38-4.64,3.4.58,4.95,1.87c11,9.15,24.35,23,24.35,23,.22.16,1.11,1.89,6.06,2.78,4.25.77,11.78.32,17-4a26.69,26.69,0,0,0,3.74-3.84,1.26,1.26,0,0,1-.24.2c5.5-7.05-.62-14.17-.62-14.17l-25.13-28.24s-3.6-3.31-2.37-4.65c1.08-1.16,3.41.59,5,1.89,8,6.66,19.21,17.94,30,28.5,2.11,1.54,11.58,7.41,24.12-.83,7.62-5,9.14-11.13,8.93-15.76-.53-6.12-5.31-10.49-5.31-10.49l-34.34-34.52s-3.63-3.09-2.35-4.66c1.05-1.31,3.4.59,4.94,1.87,11,9.16,40.56,36.31,40.56,36.31.41.29,10.64,7.57,23.3-.48,4.51-2.88,7.41-7.23,7.66-12.3a18.21,18.21,0,0,0-5.77-14" fill="#fff"/><path d="M427.05,253.21c-5.32-.06-11.15,3.11-11.9,2.64-.44-.28.32-2.41.82-3.65s7.52-22.31-9.58-29.65c-13.07-5.61-21.07.7-23.83,3.57-.7.74-1,.68-1.11-.28-.27-3.79-2-14.08-13.26-17.51-16.12-4.94-26.51,6.31-29.12,10.37a18.68,18.68,0,1,0-5.56,15.88c.1.11.14.28.1.64-.79,4.63-2.24,21.46,15.38,28.32,7.06,2.73,13.08.7,18.06-2.8,1.48-1.05,1.72-.61,1.51.79-.64,4.33.17,13.59,13.16,18.87,9.9,4,15.75-.09,19.57-3.65,1.68-1.51,2.13-1.27,2.22,1.09a23.56,23.56,0,1,0,23.54-24.63" fill="#fff"/><path d="M427.05,298.64a21.72,21.72,0,0,1-21.83-20.87c0-1-.13-3.66-2.39-3.66a4.19,4.19,0,0,0-2.65,1.39c-2.6,2.42-5.9,4.86-10.72,4.86a18.83,18.83,0,0,1-7.07-1.54c-12.46-5-12.62-13.6-12.12-17a3.12,3.12,0,0,0-.46-2.63l-.76-.67h-.78a3.76,3.76,0,0,0-2.16.87,18.18,18.18,0,0,1-10.58,3.77,16.22,16.22,0,0,1-5.9-1.17c-16.4-6.38-15.12-21.86-14.32-26.52a2.25,2.25,0,0,0-.7-2.16l-1.17-1-1.08,1.05a17.05,17.05,0,1,1,5.05-14.42l.59,4.56,2.51-3.87c.28-.45,7.17-10.86,19.82-10.84a25.2,25.2,0,0,1,7.4,1.15c10.08,3.08,11.79,12.24,12.06,16,.18,2.22,1.76,2.33,2.07,2.33a2.82,2.82,0,0,0,2-1A17.15,17.15,0,0,1,396.36,222a23.75,23.75,0,0,1,9.39,2.12c16,6.88,8.77,27.26,8.68,27.47-1.38,3.37-1.43,4.85-.13,5.72l.62.3h.48a11.7,11.7,0,0,0,3.1-.81,27.44,27.44,0,0,1,8.55-1.88h0a21.87,21.87,0,1,1,0,43.73m169.89-98.2c-26.48-23.1-87.68-76.31-104.25-88.74-9.48-7.12-15.92-10.89-21.6-12.58a35.66,35.66,0,0,0-10.6-1.64A44.75,44.75,0,0,0,447,99.73c-10.71,3.4-21.38,11.88-31.7,20.08l-.53.42c-9.61,7.65-19.55,15.55-27.07,17.24a46.36,46.36,0,0,1-10,1.11c-8.42,0-16-2.44-18.83-6.06-.47-.6-.16-1.57.94-3l.13-.19,23.3-25.1C401.47,86,418.7,68.8,458.36,67.89l2,0c24.69,0,49.39,11.07,52.15,12.35,23.15,11.3,47,17,71.06,17.05,25,0,50.87-6.19,78-18.69-3-2.55-6.19-5-9.44-7.47-23.85,10.34-46.59,15.56-68.52,15.55-22.4,0-44.77-5.39-66.5-16-1.14-.56-28.41-13.4-56.77-13.41l-2.23,0c-33.31.79-52.09,12.61-64.71,23-12.27.3-22.86,3.27-32.29,5.88-8.4,2.35-15.66,4.38-22.76,4.37-2.9,0-8.16-.27-8.62-.28-8.15-.25-49.19-10.31-81.82-22.68-3.33,2.37-6.54,4.81-9.66,7.29,34.1,14,75.6,24.78,88.69,25.63,3.64.24,7.52.65,11.4.67,8.66,0,17.31-2.43,25.67-4.78,5-1.39,10.41-2.89,16.15-4-1.54,1.49-3.06,3-4.6,4.55L351.9,122.53c-1.86,1.87-5.91,6.88-3.24,13.07a16.55,16.55,0,0,0,6.22,6.9c5.65,3.81,15.75,6.37,25.13,6.37a45,45,0,0,0,10-1.05c9.92-2.22,20.33-10.51,31.34-19.27,8.8-7,21.27-15.84,30.82-18.44a35.11,35.11,0,0,1,8.59-1.18,21.35,21.35,0,0,1,2.21.12c6.33.81,12.42,3,23.32,11.13,19.43,14.6,105.39,89.8,106.24,90.54a16.53,16.53,0,0,1,5.16,12.64c-.2,4.39-2.64,8.28-6.87,11a21,21,0,0,1-11.28,3.51,18.8,18.8,0,0,1-10-2.88c-.32-.26-29.76-27.27-40.6-36.35-1.72-1.43-3.41-2.72-5.09-2.72a2.85,2.85,0,0,0-2.26,1.06c-1.71,2.11.2,5,2.46,6.93l34.4,34.58c0,.05,4.29,4,4.75,9.33.28,5.73-2.47,10.52-8.17,14.26a22.1,22.1,0,0,1-12.2,4,17.79,17.79,0,0,1-9.8-3l-4.94-4.87c-9-8.87-18.33-18-25.14-23.74-1.67-1.38-3.45-2.66-5.14-2.66a3,3,0,0,0-2.17.91c-.77.88-1.32,2.43.62,5a16.66,16.66,0,0,0,1.74,1.93l25.1,28.21c.22.25,5.18,6.13.57,12l-.89,1.13a24.31,24.31,0,0,1-2.33,2.24c-4.29,3.52-10,3.89-12.27,3.89a18.75,18.75,0,0,1-3.39-.28c-2.48-.44-4.14-1.14-4.95-2.09l-.3-.31c-1.37-1.42-14-14.34-24.5-23.09-1.38-1.15-3.1-2.6-4.89-2.6a3,3,0,0,0-2.26,1c-2.07,2.27,1,5.67,2.36,6.9l21.42,23.62a5.37,5.37,0,0,1-.82,1.43c-.77,1.08-3.37,3.68-11.13,4.65a22.32,22.32,0,0,1-2.84.17c-8,0-16.56-3.89-21-6.22A31.59,31.59,0,0,0,459,276.8a32,32,0,0,0-31.93-32l-1.15,0c.56-8-.57-23.29-16.21-30a33.52,33.52,0,0,0-13.35-2.94,26.89,26.89,0,0,0-9.79,1.78,26.79,26.79,0,0,0-15.64-13.29,35.13,35.13,0,0,0-11.45-2,30.26,30.26,0,0,0-17.86,5.7,26.93,26.93,0,0,0-40.09-2.24c-6.66-5.09-33.12-21.89-103.88-38-3.42-.78-11.29-3-16.11-4.45a116.68,116.68,0,0,0-1.8,11.61s13,3.14,15.62,3.72c72.28,16.05,96.18,32.75,100.21,35.9a27.1,27.1,0,0,0,25,37.51,26.53,26.53,0,0,0,5-.45c2.26,11,9.45,19.32,20.44,23.6a27,27,0,0,0,9.66,1.87,25,25,0,0,0,6.17-.77c2,5.16,6.59,11.58,16.81,15.72a28.27,28.27,0,0,0,10.63,2.2,23.84,23.84,0,0,0,8.26-1.47A31.91,31.91,0,0,0,449.94,299c5.15,2.87,16,8.06,27,8.07a36,36,0,0,0,4.09-.26c10.93-1.38,16-5.66,18.35-9a13.39,13.39,0,0,0,1.12-1.85,30.85,30.85,0,0,0,8.67,1.35c6,0,11.69-2,17.47-6.24s9.73-10,10.31-15a.91.91,0,0,0,0-.23,28.75,28.75,0,0,0,5.85.6,32.44,32.44,0,0,0,18-5.7c11.14-7.29,13.07-16.83,12.89-23.08a28.84,28.84,0,0,0,5.93.62,31.11,31.11,0,0,0,16.82-5.17,24.6,24.6,0,0,0,11.68-19,25.65,25.65,0,0,0-3.7-15.37c18.65-8,61.3-23.6,111.51-34.92a115.65,115.65,0,0,0-1.57-11.57,640.06,640.06,0,0,0-117.44,38.16" fill="#2d3277"/></g><g class="letras"><path class="letra" style="--i:0" d="M184.79,595.12h-30.9V517.31c0-7.1-2.35-24-22.72-24-13.6,0-23.42,9.78-23.42,24v77.81H76.8V517.31c0-7.1-2.09-24-22.47-24-13.83,0-23.42,9.78-23.42,24v77.81H0V518.06c0-32.13,21.31-56.41,54.33-56.41,16.4,0,29.75,6.89,38.43,17.91a49.25,49.25,0,0,1,38.41-17.91c33.72,0,53.62,23.3,53.62,56.41Z" fill="#2d3277"/><path class="letra" style="--i:1" d="M242,497.13q7.13-7.33,20.05-7.34,11.9,0,19.94,6.92t8.94,20.3H233c1.21-8.37,4.21-15,9-19.88m45.46,63a24.89,24.89,0,0,1-4.63,5.13c-4.79,3.92-11.27,5.12-18.91,5.12-7.23,0-12.88-1.1-18-4.32-8.43-5.19-13.18-14-13.7-26.86h93.61c.11-11.09-.23-19.59-1.13-25.49a63.41,63.41,0,0,0-10.23-26.58,52.62,52.62,0,0,0-22.2-19,73.37,73.37,0,0,0-30.21-6q-28.28,0-46,17.81t-17.72,51.2q0,35.65,19.62,51.45a70,70,0,0,0,45.25,15.82q31.06,0,48.36-18.75c6.2-6.59,10.08-13.08,11.72-19.51Z" fill="#2d3277"/><path class="letra" style="--i:2" d="M411.7,462.1c-74.54,0-70.13,66-70.13,66v67h33.82V532.25q0-15.45,3.88-22.88c4.65-8.8,13.71-13.21,27.25-13.21,1,0,2.35.06,4,.13s3.52.23,5.67.47V462.35c-1.5-.1-2.48-.14-2.88-.18s-1-.07-1.61-.07" fill="#2d3277"/><path class="letra" style="--i:3" d="M486.48,490.51q12.6,0,18.57,7.78a28.94,28.94,0,0,1,5.1,13h36.3q-3-27.43-19.22-38.32T485.5,462.1q-30,0-47,18.38t-17.06,51.46q0,29.29,15.44,47.69T485,598q32.72,0,49.4-22.06,10.46-13.66,11.69-29H509.9c-.74,6.76-2.85,12.26-6.37,16.5s-9.35,6.37-17.66,6.37q-17.56,0-23.93-16c-2.31-5.71-3.5-13.28-3.5-22.68,0-9.87,1.19-17.78,3.5-23.77q6.6-16.83,24.54-16.85" fill="#2d3277"/><path class="letra" style="--i:4" d="M637.13,543.5c-.23,11.29-3.47,19-9.65,23.3a35.27,35.27,0,0,1-20.34,6.4,18.51,18.51,0,0,1-11.84-3.86c-3.25-2.56-4.86-6.73-4.86-12.47,0-6.47,2.64-11.23,8-14.31,3.13-1.8,8.3-3.36,15.48-4.6l7.67-1.41a58.19,58.19,0,0,0,9-2.35,34.08,34.08,0,0,0,6.53-3.22Zm17.08-73.44q-16.5-8.35-37.73-8.38-32.7,0-46.11,17-8.42,10.89-9.51,27.8H593.4c.8-5,2.38-8.92,4.8-11.83q5-5.91,17.12-5.91c7.21,0,12.66,1,16.37,3s5.57,5.66,5.57,10.94c0,4.34-2.42,7.51-7.26,9.57-2.7,1.19-7.18,2.17-13.47,3L605,516.67c-13.09,1.64-23,4.42-29.77,8.28q-18.48,10.65-18.49,34.41,0,18.32,11.5,28.3c7.63,6.67,17.34,9.46,29.07,10,73.57,3.28,72.74-38.77,73.42-47.52V501.77q0-23.29-16.51-31.71" fill="#2d3277"/><path class="letra" style="--i:5" d="M765.69,559.65c-4.94,7.08-12.2,10.61-21.68,10.61s-16.61-3.56-21.28-10.67-7-17.5-7-29.35q0-16.5,6.88-27.64t21.64-11.15a25.74,25.74,0,0,1,17,6.13c7.93,6.77,11.9,18.89,11.9,34.6q0,16.85-7.43,27.47m40.58-138.19s-34.08-3.64-34.08,23.73l0,36.25a40.71,40.71,0,0,0-14.72-14.21,41.6,41.6,0,0,0-20.76-5.13q-25.33,0-40.49,18.85c-10.09,12.6-15.12,30.72-15.12,52.63q0,28.54,15.37,46.76c10.27,12.13,30.38,17.46,48.23,17.46,62.28,0,61.56-53.41,61.56-53.41Z" fill="#2d3277"/><path class="letra" style="--i:6" d="M904.5,559.37q-7.9,10.49-22.62,10.47t-22.7-10.47q-7.95-10.47-7.94-29.79t7.94-29.72q8-10.41,22.7-10.41t22.62,10.41q7.89,10.44,7.9,29.72t-7.9,29.79m26.87-77.95Q915.13,461.05,882,461.05T832.6,481.42q-16.27,20.37-16.28,48.16,0,28.27,16.28,48.38T882,598q33.16,0,49.41-20.06t16.28-48.38q0-27.77-16.28-48.16" fill="#2d3277"/><path class="letra" style="--i:7" d="M257.4,642.57V791.43h31.74V618.29S257.4,617,257.4,642.57" fill="#2d3277"/><path class="letra" style="--i:8" d="M315.07,791.67h34.05V663.17H315.07Z" fill="#2d3277"/><path class="letra" style="--i:9" d="M349.05,651.7h-34V618.05h34Z" fill="#2d3277"/><path class="letra" style="--i:10" d="M440.14,791.4H405.91L361,663.15h35.72l25.54,90.17,22.64-78.61q3.9-11.58,15.44-11.56h25.1Z" fill="#2d3277"/><path class="letra" style="--i:11" d="M557.43,659.74c-.44,0-1,0-1.59,0-74.56,0-70.14,66-70.14,66v66h33.84V729.83q0-15.45,3.88-22.88,6.93-13.2,27.23-13.22c1,0,2.35,0,4,.15s3.54.21,5.67.45V659.91c-1.5-.08-2.46-.12-2.89-.17" fill="#2d3277"/><path class="letra" style="--i:12" d="M607.12,694.35q7.07-7.27,19.88-7.27,11.76,0,19.74,6.85T655.62,714H598.24q1.82-12.42,8.88-19.69m45.06,62.42a23.88,23.88,0,0,1-4.6,5.07c-4.74,3.9-11.41,5.35-19,5.35-7.16,0-12.77-1.09-17.84-4.3q-12.57-7.7-13.32-26.87H690.2c.13-11-.23-19.41-1.13-25.26a62.67,62.67,0,0,0-10.13-26.34,52,52,0,0,0-22-18.85,72.65,72.65,0,0,0-29.92-6c-18.7,0-33.85,5.89-45.58,17.65S563.89,706,563.89,728q0,35.32,19.45,51a69.34,69.34,0,0,0,44.86,15.68q30.76,0,47.89-18.58c6.15-6.52,10-13,11.65-19.34Z" fill="#2d3277"/></g></svg></template>
+
+<div id="stage">
+
+  <!-- 1. CAPA -->
+  <section class="slide amarelo capa">
+    <div class="logo logo-capa" data-logo></div>
+    <div class="meta surge" style="--d:.6s">
+      Lab. Qualidade de Produto de Software
+      <span>Prof. Sérgio</span>
+      <span>Equipe: Arthur Voit, Henrrique Miguel, Nicolas do Santos, Pedro Luca, Thiago Wendt e Vinicius Pupo</span>
+    </div>
+    <h1 class="surge" style="--d:.35s">Mercado Livre sob a lupa da ISO/IEC 25000</h1>
+    <p class="sub surge" style="--d:.55s">Avaliamos o app em 8 características de qualidade, com nota de 1 a 5 e evidências do uso real.</p>
+    <div class="scene" data-scene></div>
+  </section>
+
+  <!-- 2. O PEDIDO -->
+  <section class="slide">
+    <header class="topo" data-topo="o que é o app e como avaliamos"></header>
+    <div class="corpo">
+      <p class="trilha"><a>Avaliação</a> &rsaquo; <a>Mercado Livre</a> &rsaquo; O pedido</p>
+      <h2>O que colocamos no carrinho</h2>
+      <div class="pedido">
+        <div class="texto">
+          <p>O <b>Mercado Livre</b> é o maior marketplace da América Latina: dá pra buscar, comprar, pagar, vender e acompanhar a entrega, tudo pelo app.</p>
+          <div class="chips">
+            <span class="chip">Android</span><span class="chip">iOS</span><span class="chip">Web</span><span class="chip">18 países</span>
+          </div>
+          <p>Usamos o app como clientes de verdade e avaliamos cada característica da ISO/IEC 25010 respondendo à sua pergunta guia.</p>
+          <div class="escala">
+            <b>Como pontuamos</b>
+            <div class="linha"><span class="estrelas" data-estrelas="1"></span> 1 = pior</div>
+            <div class="linha"><span class="estrelas" data-estrelas="5"></span> 5 = melhor</div>
+          </div>
+        </div>
+        <div class="carrinho">
+          <h4>Carrinho (<span data-total></span> características)</h4>
+          <ol data-carrinho></ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. FUNCIONALIDADE E DESEMPENHO -->
+  <section class="slide">
+    <header class="topo" data-topo="adequação funcional e eficiência de desempenho"></header>
+    <div class="corpo">
+      <p class="trilha"><a>Avaliação</a> &rsaquo; <a>Mercado Livre</a> &rsaquo; Funcionalidade e desempenho</p>
+      <h2>Faz o que precisa, e rápido? <span class="resultados">2 resultados</span></h2>
+      <div class="cards">
+        <article class="card" data-nome="Adequação funcional" data-nota="5" data-icone="🛒" data-pergunta="O sistema faz o que o usuário precisa?">
+          <ul class="evid">
+            <li class="ok">Busca com filtros, carrinho, pagamento, rastreio e devolução no mesmo app</li>
+            <li class="ok">Perguntas ao vendedor e avaliações com fotos ajudam a decidir</li>
+            <li class="ok">Compra Garantida devolve o dinheiro se o produto não chegar</li>
+          </ul>
+        </article>
+        <article class="card" data-nome="Eficiência de desempenho" data-nota="4" data-icone="⚡" data-pergunta="O sistema responde rapidamente?">
+          <ul class="evid">
+            <li class="ok">Busca e páginas de produto abrem rápido no Wi-Fi e no 4G</li>
+            <li class="ok">Imagens carregam aos poucos sem travar a rolagem</li>
+            <li class="ruim">App pesado e home cheia de banners deixam celulares mais simples lentos</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. COMPATIBILIDADE E USABILIDADE -->
+  <section class="slide">
+    <header class="topo" data-topo="compatibilidade e usabilidade"></header>
+    <div class="corpo">
+      <p class="trilha"><a>Avaliação</a> &rsaquo; <a>Mercado Livre</a> &rsaquo; Compatibilidade e usabilidade</p>
+      <h2>Conversa com tudo e é fácil de usar? <span class="resultados">2 resultados</span></h2>
+      <div class="cards">
+        <article class="card" data-nome="Compatibilidade" data-nota="5" data-icone="🔌" data-pergunta="Funciona bem com outros sistemas ou ambientes?">
+          <ul class="evid">
+            <li class="ok">Integrado ao Mercado Pago: Pix, cartão, boleto e saldo em conta</li>
+            <li class="ok">Anúncios compartilhados pelo WhatsApp e redes sociais</li>
+            <li class="ok">Link aberto no navegador vai direto para o app</li>
+          </ul>
+        </article>
+        <article class="card" data-nome="Usabilidade" data-nota="4" data-icone="👆" data-pergunta="É fácil de aprender e usar?">
+          <ul class="evid">
+            <li class="ok">Do produto ao pagamento em poucos toques</li>
+            <li class="ok">Visual consistente: amarelo, azul e o verde do frete grátis</li>
+            <li class="ruim">Home poluída com anúncios e notificações demais</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. CONFIABILIDADE E SEGURANÇA -->
+  <section class="slide">
+    <header class="topo" data-topo="confiabilidade e segurança"></header>
+    <div class="corpo">
+      <p class="trilha"><a>Avaliação</a> &rsaquo; <a>Mercado Livre</a> &rsaquo; Confiabilidade e segurança</p>
+      <h2>Dá pra confiar? <span class="resultados">2 resultados</span></h2>
+      <div class="cards">
+        <article class="card" data-nome="Confiabilidade" data-nota="4" data-icone="🕒" data-pergunta="O sistema se mantém estável e disponível?">
+          <ul class="evid">
+            <li class="ok">Raramente fica fora do ar no dia a dia</li>
+            <li class="ok">Carrinho e histórico sincronizam entre celular e computador</li>
+            <li class="ruim">Picos como a Black Friday já causaram lentidão e erros</li>
+          </ul>
+        </article>
+        <article class="card" data-nome="Segurança" data-nota="4" data-icone="🔒" data-pergunta="Protege dados e acessos?">
+          <ul class="evid">
+            <li class="ok">Verificação em duas etapas e login por biometria</li>
+            <li class="ok">Pagamento intermediado: o vendedor não vê os dados do cartão</li>
+            <li class="ruim">Golpes com links falsos e vendedores mal-intencionados ainda aparecem</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. MANUTENIBILIDADE E PORTABILIDADE -->
+  <section class="slide">
+    <header class="topo" data-topo="manutenibilidade e portabilidade"></header>
+    <div class="corpo">
+      <p class="trilha"><a>Avaliação</a> &rsaquo; <a>Mercado Livre</a> &rsaquo; Manutenibilidade e portabilidade</p>
+      <h2>Evolui fácil e roda em qualquer lugar? <span class="resultados">2 resultados</span></h2>
+      <div class="cards">
+        <article class="card" data-nome="Manutenibilidade" data-nota="4" data-icone="🔧" data-pergunta="Parece fácil de corrigir, adaptar ou evoluir?">
+          <ul class="evid">
+            <li class="ok">Atualizações frequentes na loja de apps</li>
+            <li class="ok">Funções novas chegam sem quebrar as antigas</li>
+            <li class="ruim">Como usuários, só vemos o resultado, não o código</li>
+          </ul>
+        </article>
+        <article class="card" data-nome="Portabilidade" data-nota="5" data-icone="📱" data-pergunta="Funciona em diferentes dispositivos ou plataformas?">
+          <ul class="evid">
+            <li class="ok">Android, iOS e web com a mesma conta</li>
+            <li class="ok">Se adapta a celular, tablet e computador</li>
+            <li class="ok">O mesmo app atende 18 países da América Latina</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. PLACAR -->
+  <section class="slide" data-placar>
+    <header class="topo" data-topo="resultado da avaliação"></header>
+    <div class="corpo">
+      <p class="trilha"><a>Avaliação</a> &rsaquo; <a>Mercado Livre</a> &rsaquo; Opiniões sobre o app</p>
+      <h2>Opiniões sobre o app</h2>
+      <div class="placar">
+        <div class="resumo">
+          <div class="media" data-media>0,0</div>
+          <span class="estrelas" data-estrelas-media></span>
+          <p class="legenda">Média das <span data-total></span> características</p>
+          <h4 class="bom">Pontos fortes</h4>
+          <ul><li>Faz tudo, da busca à devolução</li><li>Roda em qualquer aparelho</li><li>Integração com Mercado Pago</li></ul>
+          <h4 class="melhorar">Dá pra melhorar</h4>
+          <ul><li>Home carregada de anúncios</li><li>Golpes ainda aparecem</li></ul>
+        </div>
+        <div class="barras">
+          <h4>Nota por característica</h4>
+          <div data-barras></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. FINAL -->
+  <section class="slide amarelo final">
+    <h1 class="surge" style="--d:.2s">Pedido entregue!</h1>
+    <p class="sub surge" style="--d:.45s">Obrigado pela atenção. Ficou alguma dúvida?</p>
+    <div class="carimbo"><div><b data-media-final>4,4</b>de 5</div></div>
+    <div class="scene" data-scene></div>
+  </section>
+
+  <nav class="rota" aria-label="Progresso da apresentação">
+    <div class="linha" data-linha>
+      <svg class="mini" viewBox="0 0 46 26" aria-hidden="true">
+        <rect x="1" y="2" width="28" height="17" rx="2" fill="#FFE600" stroke="#2D3277" stroke-width="2"/>
+        <path d="M29 19V8h8l7 7v4z" fill="#2D3277"/>
+        <circle cx="9" cy="21" r="4" fill="#222"/><circle cx="36" cy="21" r="4" fill="#222"/>
+      </svg>
+    </div>
+    <span class="contador" data-contador></span>
+  </nav>
+</div>
+
+<script>
+const ESTRELA = (cls, i) => `<svg class="${cls}" style="--i:${i}"><use href="#estrela"/></svg>`;
+const estrelas = n => Array.from({length: 5}, (_, i) => ESTRELA(i < Math.round(n) ? 'cheia' : 'vazia', i)).join('');
+
+// logo oficial (mercado-livre.svg), separado em oval, mãos e letras para poder animar
+const tplLogo = document.getElementById('tpl-logo');
+const LOGO = tplLogo.innerHTML;
+const LOGO_PARTES = tplLogo.content.firstElementChild.innerHTML;
+document.querySelectorAll('[data-logo]').forEach(e => e.innerHTML = LOGO);
+const LOGO_MINI = `<div class="logo">${LOGO}</div>`;
+const LUPA = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>`;
+
+// cabeçalho de busca em cada slide do meio
+document.querySelectorAll('[data-topo]').forEach(h => {
+  h.innerHTML = `${LOGO_MINI}<div class="busca"><span>${h.dataset.topo}</span>${LUPA}</div>
+    <div class="disc"><b>ISO/IEC 25000</b>Lab. Qualidade de Produto de Software</div>`;
+});
+
+// cartões: as notas ficam só no atributo data-nota, todo o resto é calculado a partir dele
+const cards = [...document.querySelectorAll('.card[data-nota]')];
+const itens = cards.map(c => ({ nome: c.dataset.nome, nota: +c.dataset.nota, pergunta: c.dataset.pergunta }));
+cards.forEach(c => {
+  const nota = +c.dataset.nota;
+  const selo = nota === 5 ? '<div class="selo">Nota máxima</div>' : nota <= 2 ? '<div class="selo atencao">Precisa melhorar</div>' : '<div class="selo"></div>';
+  c.insertAdjacentHTML('afterbegin', `
+    <div class="cab">
+      <div class="foto">${c.dataset.icone}</div>
+      <div>
+        <h3>${c.dataset.nome}</h3>
+        <p class="pergunta">${c.dataset.pergunta}</p>
+        <div class="nota"><span class="num">${nota}</span><span class="estrelas">${estrelas(nota)}</span> de 5</div>
+        ${selo}
+      </div>
+    </div>`);
+});
+document.querySelectorAll('[data-estrelas]').forEach(e => e.innerHTML = estrelas(+e.dataset.estrelas));
+document.querySelectorAll('[data-total]').forEach(e => e.textContent = itens.length);
+
+document.querySelector('[data-carrinho]').innerHTML = itens.map((it, i) =>
+  `<li style="--i:${i}"><span class="check">✓</span><div><div class="nome">${it.nome}</div><div class="q">${it.pergunta}</div></div></li>`).join('');
+
+const media = itens.reduce((s, it) => s + it.nota, 0) / itens.length;
+const fmt = v => v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+document.querySelector('[data-estrelas-media]').innerHTML = estrelas(media);
+document.querySelector('[data-media-final]').textContent = fmt(media);
+document.querySelector('[data-barras]').innerHTML = itens.map((it, i) =>
+  `<div class="barra"><span>${it.nome}</span><div class="trilho"><div class="enche ${it.nota === 5 ? 'max' : ''}" style="--w:${it.nota * 20}%;--i:${i}"></div></div><span class="v">${it.nota}</span></div>`).join('');
+
+// cena do caminhão sendo descarregado
+const TRUCK = `
+<svg viewBox="0 0 520 260" aria-hidden="true">
+  <rect x="8" y="198" width="340" height="12" fill="#444"/>
+  <rect x="8" y="20" width="336" height="180" rx="10" fill="#FFE600" stroke="#2D3277" stroke-width="6"/>
+  <rect x="8" y="178" width="336" height="12" fill="#2D3277"/>
+  <svg x="86" y="30" width="180" height="140" viewBox="0 0 947.65 794.69">${LOGO_PARTES}</svg>
+  <rect x="11" y="24" width="20" height="152" fill="#1D2150"/>
+  <rect class="porta" x="8" y="20" width="22" height="160" rx="4" fill="#F2D900" stroke="#2D3277" stroke-width="4"/>
+  <path d="M344 200V96q0-16 16-16h70q16 0 26 16l38 54q6 10 6 22v28z" fill="#2D3277"/>
+  <path d="M362 96h66l30 46h-96z" fill="#9FD3FF"/>
+  <rect x="380" y="152" width="20" height="5" rx="2" fill="#9FD3FF"/>
+  <rect x="492" y="166" width="12" height="14" rx="3" fill="#FFE600"/>
+  <rect x="340" y="196" width="170" height="14" rx="5" fill="#555"/>
+  ${[100, 440].map(x => `<g class="wheel"><circle cx="${x}" cy="212" r="30" fill="#222"/><circle cx="${x}" cy="212" r="13" fill="#BBB"/><path d="M${x-13} 212h26M${x} 199v26" stroke="#666" stroke-width="4"/></g>`).join('')}
+</svg>`;
+
+const PELES = ['#8D5524', '#F1C27D', '#C68642'];
+const WORKER = pele => `
+<svg viewBox="0 0 50 130" aria-hidden="true">
+  <g class="cargo"><rect x="6" y="4" width="38" height="30" rx="3" fill="#C8955A" stroke="#8A5A2B" stroke-width="3"/><rect x="22" y="4" width="7" height="30" fill="#E8C18A"/></g>
+  <g class="bracos-cima" stroke="${pele}" stroke-width="6" stroke-linecap="round"><path d="M16 70L12 34M34 70L38 34"/></g>
+  <g class="bracos-baixo" stroke="${pele}" stroke-width="6" stroke-linecap="round"><path d="M16 70L10 96M34 70L40 96"/></g>
+  <line class="perna a" x1="20" y1="100" x2="20" y2="127" stroke="#2D3277" stroke-width="8" stroke-linecap="round"/>
+  <line class="perna b" x1="30" y1="100" x2="30" y2="127" stroke="#2D3277" stroke-width="8" stroke-linecap="round"/>
+  <rect x="13" y="64" width="24" height="40" rx="7" fill="#3483FA"/>
+  <rect x="13" y="80" width="24" height="5" fill="#FFE600"/>
+  <circle cx="25" cy="52" r="11" fill="${pele}"/>
+  <path d="M13 50a12 12 0 0 1 24 0z" fill="#FFE600" stroke="#2D3277" stroke-width="2"/>
+</svg>`;
+
+document.querySelectorAll('[data-scene]').forEach(s => {
+  const workers = [2.2, 3.2, 4.2].map((d, i) => `<div class="worker" style="--d:${d}s">${WORKER(PELES[i])}</div>`).join('');
+  // cada pacote cai quando um entregador chega na pilha (1,35 s depois de sair)
+  const caixas = Array.from({length: 9}, (_, i) => `<div class="box" style="--d:${3.55 + i}s"></div>`).join('');
+  s.innerHTML = `<div class="road"></div><div class="pile">${caixas}</div><div class="truck">${TRUCK}</div>${workers}`;
+});
+
+// navegação
+const stage = document.getElementById('stage');
+const slides = [...document.querySelectorAll('.slide')];
+const linha = document.querySelector('[data-linha]');
+const mini = linha.querySelector('.mini');
+const contador = document.querySelector('[data-contador]');
+slides.forEach((_, i) => {
+  const p = document.createElement('span');
+  p.className = 'parada';
+  p.style.left = (i / (slides.length - 1) * 100) + '%';
+  p.onclick = e => { e.stopPropagation(); ir(i); };
+  linha.appendChild(p);
+});
+const paradas = [...linha.querySelectorAll('.parada')];
+
+let atual = -1;
+function ir(n) {
+  n = Math.max(0, Math.min(slides.length - 1, n));
+  if (n === atual) return;
+  if (atual >= 0) slides[atual].classList.remove('active');
+  void slides[n].offsetWidth; // reinicia as animações ao voltar para um slide
+  slides[n].classList.add('active');
+  atual = n;
+  mini.style.left = (n / (slides.length - 1) * 100) + '%';
+  paradas.forEach((p, i) => p.classList.toggle('feita', i <= n));
+  contador.textContent = `${n + 1}/${slides.length}`;
+  history.replaceState(null, '', '#' + (n + 1));
+  if (slides[n].hasAttribute('data-placar')) contarMedia();
+}
+
+function contarMedia() {
+  const el = document.querySelector('[data-media]');
+  const t0 = performance.now(), dur = 1200;
+  const passo = t => {
+    const k = Math.min(1, (t - t0) / dur);
+    el.textContent = fmt(media * (1 - Math.pow(1 - k, 3)));
+    if (k < 1 && slides[atual].hasAttribute('data-placar')) requestAnimationFrame(passo);
+  };
+  requestAnimationFrame(passo);
+}
+
+addEventListener('keydown', e => {
+  if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); ir(atual + 1); }
+  else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); ir(atual - 1); }
+  else if (e.key === 'Home') ir(0);
+  else if (e.key === 'End') ir(slides.length - 1);
+  else if (e.key.toLowerCase() === 'f') {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  }
+});
+stage.addEventListener('click', e => ir(atual + (e.clientX < innerWidth / 3 ? -1 : 1)));
+let toqueX = null;
+addEventListener('touchstart', e => toqueX = e.touches[0].clientX, { passive: true });
+addEventListener('touchend', e => {
+  if (toqueX === null) return;
+  const dx = e.changedTouches[0].clientX - toqueX;
+  if (Math.abs(dx) > 40) ir(atual + (dx < 0 ? 1 : -1));
+  toqueX = null;
+});
+
+function encaixar() {
+  const s = Math.min(innerWidth / 1600, innerHeight / 900);
+  stage.style.transform = `translate(-50%, -50%) scale(${s})`;
+}
+if (new URLSearchParams(location.search).has('print')) {
+  document.body.classList.add('print');
+  slides.forEach(s => s.classList.add('active'));
+  document.querySelector('[data-media]').textContent = fmt(media);
+} else {
+  addEventListener('resize', encaixar);
+  encaixar();
+  ir((parseInt(location.hash.slice(1)) || 1) - 1);
+}
+</script>
+</body>
+</html>
