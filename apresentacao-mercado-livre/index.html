@@ -637,15 +637,28 @@ function contarMedia() {
 }
 
 addEventListener('keydown', e => {
-  if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); ir(atual + 1); }
-  else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); ir(atual - 1); }
+  if (['ArrowRight', 'ArrowUp', 'PageDown', ' ', 'Enter', 'x', 'X'].includes(e.key)) { e.preventDefault(); ir(atual + 1); }
+  else if (['ArrowLeft', 'ArrowDown', 'PageUp', 'Backspace', 'z', 'Z'].includes(e.key)) { e.preventDefault(); ir(atual - 1); }
   else if (e.key === 'Home') ir(0);
   else if (e.key === 'End') ir(slides.length - 1);
   else if (e.key.toLowerCase() === 'f') {
     document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
   }
 });
-stage.addEventListener('click', e => ir(atual + (e.clientX < innerWidth / 3 ? -1 : 1)));
+// mouse: botão esquerdo avança, botão direito volta
+stage.addEventListener('click', () => ir(atual + 1));
+stage.addEventListener('contextmenu', e => { e.preventDefault(); ir(atual - 1); });
+
+// scroll: um slide por gesto (touchpads disparam vários eventos seguidos, então espera o gesto acabar)
+let rolando = false, fimRolagem;
+addEventListener('wheel', e => {
+  e.preventDefault();
+  clearTimeout(fimRolagem);
+  fimRolagem = setTimeout(() => rolando = false, 250);
+  if (rolando || Math.abs(e.deltaY) < 4) return;
+  rolando = true;
+  ir(atual + (e.deltaY > 0 ? 1 : -1));
+}, { passive: false });
 let toqueX = null;
 addEventListener('touchstart', e => toqueX = e.touches[0].clientX, { passive: true });
 addEventListener('touchend', e => {
